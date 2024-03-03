@@ -10,10 +10,7 @@ HOME_PATH = os.path.expanduser('~')
 SHORTCUTS_DB_PATH = os.path.join(HOME_PATH, 
                                 'Library', 'Shortcuts', "Shortcuts.sqlite")
 SHORTCUT_NAME = 'send-imessage'
-SHORTCUT_PHOTO_NAME = 'send-photo'
 SQL_CMD = f'SELECT ZNAME FROM ZSHORTCUT WHERE ZNAME LIKE "{SHORTCUT_NAME}";'
-SHORTCUTS_DOCUMENTS_DIR = os.path.join(HOME_PATH, 'Library', 'Mobile Documents', 'iCloud~is~workflow~my~workflows', 'Documents')
-
 
 def _dump_file(recipients: list[str], message: str) -> None:
     with open(TEMP_FILE_PATH, 'w') as f:
@@ -23,13 +20,22 @@ def _dump_file(recipients: list[str], message: str) -> None:
             }
         json.dump(message_details, f)
 
-def send_image(recipients: list[str], message: str, image_path: str) -> None:
+def send_image(recipients: list[str], message: str | None, image_path: str) -> None:
+    """enables an image to be sent from an absolute file path
+
+    Args:
+        recipients (list[str]): The phone numbers to address the iMessage to
+        message (str | None): the message to send with the photo, if no message should be included, pass None
+        image_path (str): file path to image, must be absolute
+    """
+    if len(message) == 0:
+        message = None
     _dump_file(recipients, message)
 
     Popen([
         'shortcuts',
         'run',
-        SHORTCUT_PHOTO_NAME,
+        SHORTCUT_NAME,
         '--input-path',
         TEMP_FILE_PATH,
         '--input-path',
@@ -41,7 +47,7 @@ def check_shortcut_exists() -> bool:
         Wrap in a try/except in case db connection fails.
 
     Raises:
-        e: if sqlte3 cannot make a database connection this will pass on the exception. 
+        e: if sqlte3 cannot make a database connection this will propogate the exception. 
         Most likely your application needs to be given disk access
 
     Returns:
