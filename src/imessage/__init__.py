@@ -6,11 +6,35 @@ TEMP_FILE_NAME = 'temp_py_imessage_shortcuts.json'
 REPOSITORY_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP_FILE_PATH = os.path.join(REPOSITORY_ROOT_DIR, TEMP_FILE_NAME)
 
-SHORTCUTS_DB_PATH = os.path.join(os.path.expanduser('~'), 
+HOME_PATH = os.path.expanduser('~')
+SHORTCUTS_DB_PATH = os.path.join(HOME_PATH, 
                                 'Library', 'Shortcuts', "Shortcuts.sqlite")
 SHORTCUT_NAME = 'send-imessage'
+SHORTCUT_PHOTO_NAME = 'send-photo'
 SQL_CMD = f'SELECT ZNAME FROM ZSHORTCUT WHERE ZNAME LIKE "{SHORTCUT_NAME}";'
+SHORTCUTS_DOCUMENTS_DIR = os.path.join(HOME_PATH, 'Library', 'Mobile Documents', 'iCloud~is~workflow~my~workflows', 'Documents')
 
+
+def _dump_file(recipients: list[str], message: str) -> None:
+    with open(TEMP_FILE_PATH, 'w') as f:
+        message_details = {
+            'recipients': recipients, 
+            'message': message
+            }
+        json.dump(message_details, f)
+
+def send_image(recipients: list[str], message: str, image_path: str) -> None:
+    _dump_file(recipients, message)
+
+    Popen([
+        'shortcuts',
+        'run',
+        SHORTCUT_PHOTO_NAME,
+        '--input-path',
+        TEMP_FILE_PATH,
+        '--input-path',
+        image_path,
+    ])
 
 def check_shortcut_exists() -> bool:
     """ Validates that the shortcut exists by querying the shortcuts database. 
@@ -36,9 +60,7 @@ def check_shortcut_exists() -> bool:
 
 def send(recipients: list[str], message: str) -> None:
     # Write message details to temp file (Shortcuts via command line only accepts files as inputs)
-    with open(TEMP_FILE_PATH, 'w') as f:
-        message_details = {'recipients': recipients, 'message': message}
-        json.dump(message_details, f)
+    _dump_file(recipients, message)
 
     # Run the shortcut
     Popen([
