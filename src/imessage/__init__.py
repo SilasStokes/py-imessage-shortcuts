@@ -47,20 +47,14 @@ def check_shortcut_exists(shortcut_name:str = SHORTCUT_NAME) -> bool:
     Returns:
         bool: True if shortcut_name exists in shortcuts, False if not. 
     """
-    try:
-        result = run(["shortcuts", "list"], capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            print("Error running 'shortcuts list' command")
-            return False
-        
-        shortcut_list = result.stdout.splitlines()
-        
-        return shortcut_name in shortcut_list
+    result = run(["shortcuts", "list"], capture_output=True, text=True)
     
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    if result.returncode != 0:
         return False
+    
+    shortcut_list = result.stdout.splitlines()
+    
+    return shortcut_name in shortcut_list
 
 
 def send(recipients: list[str], message: str) -> None:
