@@ -4,6 +4,9 @@ temp_py_imessage_shortcuts.json
 # MacOS System Files
 .DS_Store
 
+# IntelliJ Idea
+.idea
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
